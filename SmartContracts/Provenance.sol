@@ -30,6 +30,46 @@ contract Provenance {
         uint timeStamp;
         ProductStatus status;
         address currentHolder;
+        string[] sourceProductSerialNos; // New field to store source product serial numbers
+    }
+
+    // Modified addProduct function to include source products
+    function addProduct(
+        string memory serialNo, 
+        string memory _name, 
+        uint[] memory _locationData, 
+        string[] memory _sourceProductSerialNos // New parameter for source products
+    ) 
+        public 
+    {
+        require(entities[msg.sender].isRegistered, "Only registered entities can add products");
+        require(bytes(serialNo).length != 0, "Serial number cannot be empty");
+        require(products[serialNo].timeStamp == 0, "Product already exists");
+
+        // Verify each source product exists
+        for (uint i = 0; i < _sourceProductSerialNos.length; i++) {
+            require(
+                products[_sourceProductSerialNos[i]].timeStamp != 0,
+                "Source product does not exist"
+            );
+        }
+
+        products[serialNo] = Product(
+            _name, 
+            _locationData, 
+            block.timestamp, 
+            ProductStatus.Created, 
+            msg.sender, 
+            _sourceProductSerialNos // Store source product serial numbers
+        );
+        productSerialNumbers.push(serialNo);
+        emit ProductAdded(serialNo, _name, _locationData, block.timestamp, msg.sender);
+    }
+
+    // Function to get a product's source product serial numbers
+    function getSourceProducts(string memory serialNo) public view returns (string[] memory) {
+        require(products[serialNo].timeStamp != 0, "Product does not exist");
+        return products[serialNo].sourceProductSerialNos;
     }
 
     constructor() {
