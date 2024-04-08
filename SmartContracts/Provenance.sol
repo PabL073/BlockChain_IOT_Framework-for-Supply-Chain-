@@ -93,15 +93,7 @@ contract Provenance {
         entities[_entity].isCertified = true;
     }
 
-    function addProduct(string memory serialNo, string memory _name, uint[] memory _locationData) public {
-        require(entities[msg.sender].isRegistered, "Only registered entities can add products");
-        require(bytes(serialNo).length != 0, "Serial number cannot be empty");
-        require(products[serialNo].timeStamp == 0, "Product already exists");
-        
-        products[serialNo] = Product(_name, _locationData, block.timestamp, ProductStatus.Created, msg.sender);
-        productSerialNumbers.push(serialNo);
-        emit ProductAdded(serialNo, _name, _locationData, block.timestamp, msg.sender);
-    }
+
 
     function transferOwnership(string memory serialNo, address newOwner) public {
         require(products[serialNo].status == ProductStatus.Owned, "Product not owned or already in transfer");
